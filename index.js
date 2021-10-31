@@ -24,12 +24,14 @@ async function run() {
         const ridesCollection = database.collection("rides");
         const bookingsCollection = database.collection("bookings");
 
+        // Get all rides
         app.get("/rides", async (req, res) => {
             const cursor = ridesCollection.find({});
             const rides = await cursor.toArray();
             res.send(rides);
         });
 
+        // Get ride by id
         app.get("/rides/:rideId", async (req, res) => {
             const id = req.params.rideId;
             const query = { _id: ObjectId(id) };
@@ -37,6 +39,14 @@ async function run() {
             res.send(ride);
         });
 
+        // Get all the bookings
+        app.get("/bookings", async (req, res) => {
+            const cursor = bookingsCollection.find({});
+            const result = await cursor.toArray();
+            res.send(result);
+        });
+
+        // Get booking by email
         app.get("/bookings/:email", async (req, res) => {
             const email = req.params.email;
             const filter = bookingsCollection.find({ email: email });
@@ -44,6 +54,14 @@ async function run() {
             res.send(result);
         });
 
+        // Add a new ride information
+        app.post("/rides", async (req, res) => {
+            const rideDetail = req.body;
+            const result = await ridesCollection.insertOne(rideDetail);
+            res.send(result);
+        });
+
+        // Add a new booking
         app.post("/bookings", async (req, res) => {
             const booking = req.body;
             const result = await bookingsCollection.insertOne(booking);
@@ -51,6 +69,24 @@ async function run() {
             res.send(result);
         });
 
+        // Update bookings status
+        app.put("/bookings/:id", async (req, res) => {
+            const id = req.params.id;
+            // console.log("accessed");
+            // console.log(id);
+            // console.log(req.body.status);
+            const query = { _id: ObjectId(id) };
+            console.log(query);
+            const updateDoc = {
+                $set: {
+                    status: req.body.status,
+                },
+            };
+            const result = await bookingsCollection.updateOne(query, updateDoc);
+            res.send(result);
+        });
+
+        // Delete a booking
         app.delete("/bookings/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
